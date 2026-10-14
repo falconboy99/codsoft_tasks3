@@ -6,6 +6,10 @@ An end-to-end Machine Learning project comparing **Gradient Boosting (Champion, 
 
 ## ⚡ Live Demo & Web App
 
+
+ https://customerchurnpredictione.netlify.app/
+
+ 
 A production-grade, interactive dashboard is included right in the repository:
 
 - 🔮 **Real-Time Customer Risk Simulator**: Live risk scoring via embedded 150-tree Gradient Boosting and Logistic Regression engines with zero backend latency.
