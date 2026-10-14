@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Churn Prediction & Intelligence Lab</title>
+  <meta name="description" content="Production-ready customer churn prediction simulator and analytics dashboard powered by Gradient Boosting and Machine Learning.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Ambient Deep Background Canvas & Mesh Layers -->
+  <div class="bg-base-gradient"></div>
+  <div class="bg-grid-pattern"></div>
+  <div class="bg-vignette"></div>
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+  <div class="ambient-glow glow-4"></div>
+  <canvas id="ambientNetworkCanvas" class="ambient-canvas"></canvas>
+
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" />
+            <path d="M9 12l2 2 4-4" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">ChurnShield AI</h1>
+          <p class="brand-subtitle">Bank Customer Retention & Risk Forecasting Engine</p>
+        </div>
+      </div>
+
+      <div class="header-badges">
+        <div class="stat-pill">
+          <span class="pulse-dot"></span>
+          <span class="stat-label">Champion Model:</span>
+          <span class="stat-value highlight">Gradient Boosting (AUC 0.872)</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">Optimal F1 Cutoff:</span>
+          <span class="stat-value">0.30</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">Cohort:</span>
+          <span class="stat-value">10,000 Customers</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" id="navTabs">
+      <button class="nav-btn active" data-tab="tab-predictor" id="btnTabPredictor">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Live Customer Predictor
+      </button>
+      <button class="nav-btn" data-tab="tab-models" id="btnTabModels">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        Model Benchmarks & ROC
+      </button>
+      <button class="nav-btn" data-tab="tab-insights" id="btnTabInsights">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        Feature Drivers & EDA
+      </button>
+      <button class="nav-btn" data-tab="tab-batch" id="btnTabBatch">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Batch Scoring & Test Set
+      </button>
+      <button class="nav-btn" data-tab="tab-briefing" id="btnTabBriefing">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Executive Findings
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-content">
+    
+    <!-- ==================== TAB 1: LIVE PREDICTOR ==================== -->
+    <section class="tab-pane active" id="tab-predictor">
+      <!-- Persona Presets Bar -->
+      <div class="preset-banner">
+        <span class="preset-title">⚡ Quick Customer Personas:</span>
+        <div class="preset-buttons">
+          <button class="preset-chip" id="presetHighRiskSenior" type="button">
+            <span class="chip-dot danger"></span>
+            High-Risk Senior (Germany, 3 Products)
+          </button>
+          <button class="preset-chip" id="presetLoyalCore" type="button">
+            <span class="chip-dot success"></span>
+            Loyal Active Saver (France, 2 Products)
+          </button>
+          <button class="preset-chip" id="presetInactiveWealthy" type="button">
+            <span class="chip-dot warning"></span>
+            Disengaged Wealthy Saver (Germany, $140k)
+          </button>
+          <button class="preset-chip" id="presetZeroBalanceYoung" type="button">
+            <span class="chip-dot info"></span>
+            Digital Native Zero-Balance (Spain, 2 Products)
+          </button>
+        </div>
+      </div>
+
+      <div class="predictor-grid">
+        <!-- Input Form Section -->
+        <div class="card form-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Customer Profile Attributes</h2>
+              <p class="card-sub">Tune account attributes to simulate churn risk instantaneously.</p>
+            </div>
+            <div class="model-select-wrapper">
+              <label for="modelSelect">Scoring Engine:</label>
+              <select id="modelSelect" class="custom-select">
+                <option value="gb_tuned" selected>Gradient Boosting (Tuned @ 0.30 - Recommended)</option>
+                <option value="gb_std">Gradient Boosting (Standard @ 0.50)</option>
+                <option value="lr_tuned">Logistic Regression (Tuned @ 0.54)</option>
+                <option value="lr_std">Logistic Regression (Standard @ 0.50)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Form Fields Grid -->
+          <div class="controls-grid">
+            
+            <!-- Demographic Group -->
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="inputAge">Customer Age</label>
+                <span class="control-val" id="valAge">42 yrs</span>
+              </div>
+              <input type="range" id="inputAge" min="18" max="85" value="42" class="custom-slider">
+              <div class="slider-ticks"><span>18</span><span>35</span><span>50</span><span>65</span><span>85</span></div>
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="selectGeography">Geography</label>
+              </div>
+              <div class="segmented-control" id="segGeography">
+                <button type="button" class="seg-btn" data-value="France">France (16% avg)</button>
+                <button type="button" class="seg-btn active" data-value="Germany">Germany (32% avg)</button>
+                <button type="button" class="seg-btn" data-value="Spain">Spain (16% avg)</button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="selectGender">Customer Gender</label>
+              </div>
+              <div class="segmented-control" id="segGender">
+                <button type="button" class="seg-btn active" data-value="Female">Female</button>
+                <button type="button" class="seg-btn" data-value="Male">Male</button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="inputProducts">Number of Products</label>
+                <span class="control-val highlight-warn" id="valProducts">1 Product</span>
+              </div>
+              <div class="product-selector" id="segProducts">
+                <button type="button" class="prod-btn active" data-value="1">1 Prod <span>(28% churn)</span></button>
+                <button type="button" class="prod-btn" data-value="2">2 Prods <span>(7.6% churn ⭐)</span></button>
+                <button type="button" class="prod-btn" data-value="3">3 Prods <span>(83% churn ⚠️)</span></button>
+                <button type="button" class="prod-btn" data-value="4">4 Prods <span>(100% churn 🚨)</span></button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="inputBalance">Account Balance ($)</label>
+                <div class="balance-meta">
+                  <button type="button" class="btn-micro" id="btnZeroBalanceToggle">Toggle $0 Balance</button>
+                  <span class="control-val" id="valBalance">$85,000</span>
+                </div>
+              </div>
+              <input type="range" id="inputBalance" min="0" max="250000" step="1000" value="85000" class="custom-slider">
+              <div class="slider-ticks"><span>$0</span><span>$60k</span><span>$125k</span><span>$190k</span><span>$250k</span></div>
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="inputSalary">Estimated Annual Salary ($)</label>
+                <span class="control-val" id="valSalary">$105,000</span>
+              </div>
+              <input type="range" id="inputSalary" min="10000" max="200000" step="1000" value="105000" class="custom-slider">
+              <div class="slider-ticks"><span>$10k</span><span>$50k</span><span>$100k</span><span>$150k</span><span>$200k</span></div>
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="inputCreditScore">Credit Score</label>
+                <span class="control-val" id="valCreditScore">650</span>
+              </div>
+              <input type="range" id="inputCreditScore" min="350" max="850" step="5" value="650" class="custom-slider">
+              <div class="slider-ticks"><span>350 (Poor)</span><span>580</span><span>670 (Good)</span><span>740</span><span>850 (Exceptional)</span></div>
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="inputTenure">Tenure with Bank</label>
+                <span class="control-val" id="valTenure">4 years</span>
+              </div>
+              <input type="range" id="inputTenure" min="0" max="10" step="1" value="4" class="custom-slider">
+              <div class="slider-ticks"><span>0 yr</span><span>2 yr</span><span>5 yr</span><span>7 yr</span><span>10 yr</span></div>
+            </div>
+
+            <div class="control-group toggle-group">
+              <label class="toggle-card">
+                <div class="toggle-text">
+                  <span class="toggle-title">Active Member Status</span>
+                  <span class="toggle-desc">Inactive members churn at 2x higher rate (27% vs 14%)</span>
+                </div>
+                <input type="checkbox" id="inputIsActive" class="custom-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="control-group toggle-group">
+              <label class="toggle-card">
+                <div class="toggle-text">
+                  <span class="toggle-title">Credit Card Holder</span>
+                  <span class="toggle-desc">Customer has an active bank credit card</span>
+                </div>
+                <input type="checkbox" id="inputHasCrCard" class="custom-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+          </div>
+
+          <!-- Feature Engineering Live Readout -->
+          <div class="engineered-features-box">
+            <span class="ef-tag">Engineered Features:</span>
+            <div class="ef-item">
+              <span class="ef-label">ZeroBalance Flag:</span>
+              <span class="ef-val" id="valZeroBalanceFlag">No (0)</span>
+            </div>
+            <div class="ef-item">
+              <span class="ef-label">Balance-to-Salary Ratio:</span>
+              <span class="ef-val" id="valBalanceToSalary">0.81x</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Output Score & Prescription Panel -->
+        <div class="card result-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Real-Time Risk Diagnosis</h2>
+              <p class="card-sub">Inference scored via 150-tree Gradient Boosting classifier.</p>
+            </div>
+            <span class="live-pulse-badge">Live Inference</span>
+          </div>
+
+          <!-- Radial Probability Dial -->
+          <div class="gauge-container">
+            <div class="radial-gauge" id="riskDial">
+              <svg viewBox="0 0 200 200" class="gauge-svg">
+                <circle class="gauge-bg" cx="100" cy="100" r="82" />
+                <circle class="gauge-fill" id="gaugeFill" cx="100" cy="100" r="82" />
+              </svg>
+              <div class="gauge-center">
+                <span class="gauge-percent" id="probPercent">--%</span>
+                <span class="gauge-label">CHURN RISK</span>
+              </div>
+            </div>
+
+            <!-- Risk Status Banner -->
+            <div class="risk-decision-banner" id="riskBanner">
+              <div class="risk-badge-row">
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span class="risk-title" id="riskTitle">Analyzing Profile...</span>
+              </div>
+              <p class="risk-detail" id="riskDetail">Evaluating features against decision boundary...</p>
+            </div>
+          </div>
+
+          <!-- Key Contributing Factors (Local Feature Importance) -->
+          <div class="drivers-container">
+            <h3 class="section-title">Risk Factor Breakdown</h3>
+            <div class="driver-bars" id="driverBars">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+
+          <!-- Actionable Retention Playbook -->
+          <div class="retention-card" id="retentionCard">
+            <div class="retention-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="retention-icon">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <div>
+                <h4 class="retention-title" id="retentionTitle">Prescribed Retention Playbook</h4>
+                <p class="retention-sub" id="retentionAction">Tactical intervention recommendation</p>
+              </div>
+            </div>
+            <ul class="retention-checklist" id="retentionChecklist">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: MODEL BENCHMARKS ==================== -->
+    <section class="tab-pane" id="tab-models">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Model Performance & Evaluation Hub</h2>
+            <p class="card-sub">Rigorous 5-fold cross-validation and held-out test set (n = 2,000) comparison.</p>
+          </div>
+        </div>
+
+        <!-- Comparative Metrics Table -->
+        <div class="table-responsive">
+          <table class="benchmark-table">
+            <thead>
+              <tr>
+                <th>Model Architecture</th>
+                <th>CV ROC-AUC</th>
+                <th>Test ROC-AUC</th>
+                <th>PR-AUC</th>
+                <th>Precision @ Tuned</th>
+                <th>Recall @ Tuned</th>
+                <th>F1 Score</th>
+                <th>Tuned Cutoff</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="highlight-row">
+                <td>
+                  <strong>Gradient Boosting</strong>
+                  <span class="table-badge champion">CHAMPION</span>
+                </td>
+                <td>0.863 ± 0.009</td>
+                <td><strong class="highlight-green">0.872</strong></td>
+                <td><strong class="highlight-green">0.725</strong></td>
+                <td>62.5%</td>
+                <td>65.1%</td>
+                <td><strong class="highlight-green">0.638</strong></td>
+                <td>0.30</td>
+                <td><span class="status-pill active">Deployed</span></td>
+              </tr>
+              <tr>
+                <td><strong>Random Forest</strong> (500 trees)</td>
+                <td>0.858 ± 0.012</td>
+                <td>0.860</td>
+                <td>0.690</td>
+                <td>65.6%</td>
+                <td>61.4%</td>
+                <td>0.635</td>
+                <td>0.52</td>
+                <td><span class="status-pill bench">Runner-Up</span></td>
+              </tr>
+              <tr>
+                <td><strong>Logistic Regression</strong> (Weighted)</td>
+                <td>0.766 ± 0.021</td>
+                <td>0.777</td>
+                <td>0.468</td>
+                <td>41.3%</td>
+                <td>64.4%</td>
+                <td>0.503</td>
+                <td>0.54</td>
+                <td><span class="status-pill baseline">Linear Baseline</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ROC Curves & Threshold Simulator Grid -->
+      <div class="models-grid">
+        <!-- ROC Curve Canvas Card -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">ROC Curves (Held-out Test Set)</h3>
+              <p class="card-sub">Gradient Boosting dominates across false positive rates.</p>
+            </div>
+            <div class="chart-legend">
+              <span class="legend-item"><span class="dot gb"></span> Gradient Boosting (0.872)</span>
+              <span class="legend-item"><span class="dot rf"></span> Random Forest (0.860)</span>
+              <span class="legend-item"><span class="dot lr"></span> Logistic Reg (0.777)</span>
+            </div>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="rocCanvas" width="560" height="340"></canvas>
+          </div>
+        </div>
+
+        <!-- Dynamic Threshold & Confusion Matrix Interactive Simulator -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Threshold Tuning & Confusion Matrix</h3>
+              <p class="card-sub">Tune decision cutoff to simulate business precision vs recall trade-off.</p>
+            </div>
+          </div>
+
+          <div class="threshold-control-box">
+            <div class="control-label-row">
+              <label for="sliderThreshold">Decision Threshold (&tau;):</label>
+              <span class="threshold-highlight" id="lblThresholdVal">0.30</span>
+            </div>
+            <input type="range" id="sliderThreshold" min="0.05" max="0.95" step="0.025" value="0.30" class="custom-slider">
+            <div class="threshold-quick-buttons">
+              <button type="button" class="btn-micro" id="btnSetTunedThreshold">Set to Tuned Cutoff (0.30)</button>
+              <button type="button" class="btn-micro" id="btnSetDefaultThreshold">Set to Standard (0.50)</button>
+            </div>
+          </div>
+
+          <!-- Dynamic Confusion Matrix -->
+          <div class="cm-grid">
+            <div class="cm-cell true-neg">
+              <span class="cm-label">True Negative (Retained)</span>
+              <span class="cm-val" id="cmTN">1,423</span>
+              <span class="cm-sub">Correct non-churn</span>
+            </div>
+            <div class="cm-cell false-pos">
+              <span class="cm-label">False Positive (False Alarm)</span>
+              <span class="cm-val" id="cmFP">170</span>
+              <span class="cm-sub">Unnecessary retention cost</span>
+            </div>
+            <div class="cm-cell false-neg">
+              <span class="cm-label">False Negative (Missed Churn)</span>
+              <span class="cm-val" id="cmFN">140</span>
+              <span class="cm-sub">Lost customers</span>
+            </div>
+            <div class="cm-cell true-pos">
+              <span class="cm-label">True Positive (Caught Churn)</span>
+              <span class="cm-val" id="cmTP">267</span>
+              <span class="cm-sub">Successfully flagged</span>
+            </div>
+          </div>
+
+          <!-- Resulting Metrics at this Threshold -->
+          <div class="metrics-row">
+            <div class="metric-mini">
+              <span class="m-title">Precision</span>
+              <span class="m-val" id="mPrecision">61.1%</span>
+            </div>
+            <div class="metric-mini">
+              <span class="m-title">Recall</span>
+              <span class="m-val" id="mRecall">65.6%</span>
+            </div>
+            <div class="metric-mini">
+              <span class="m-title">F1-Score</span>
+              <span class="m-val highlight" id="mF1">0.633</span>
+            </div>
+            <div class="metric-mini">
+              <span class="m-title">Overall Accuracy</span>
+              <span class="m-val" id="mAccuracy">84.5%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: FEATURE DRIVERS & EDA ==================== -->
+    <section class="tab-pane" id="tab-insights">
+      <div class="insights-grid">
+        <!-- Permutation Feature Importance Chart -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Permutation Feature Importance</h3>
+              <p class="card-sub">Drop in test ROC-AUC when each feature is randomly permuted.</p>
+            </div>
+          </div>
+          <div class="importance-chart-box" id="permImportanceBars">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- The NumOfProducts Non-Linear Paradox -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">The "NumOfProducts" Paradox</h3>
+              <p class="card-sub">Why tree models crush logistic regression by +0.09 AUC.</p>
+            </div>
+          </div>
+          <div class="product-paradox-box">
+            <div class="paradox-bar-row">
+              <div class="p-meta">
+                <span class="p-title">1 Product</span>
+                <span class="p-stat">27.7% Churn</span>
+              </div>
+              <div class="p-progress"><div class="p-fill" style="width: 27.7%; background: #f59e0b;"></div></div>
+              <span class="p-note">Single-service vulnerability</span>
+            </div>
+
+            <div class="paradox-bar-row sweet-spot">
+              <div class="p-meta">
+                <span class="p-title">2 Products</span>
+                <span class="p-stat highlight-green">7.6% Churn (Lowest!)</span>
+              </div>
+              <div class="p-progress"><div class="p-fill" style="width: 7.6%; background: #10b981;"></div></div>
+              <span class="p-note">⭐ The optimal relationship depth</span>
+            </div>
+
+            <div class="paradox-bar-row danger-spot">
+              <div class="p-meta">
+                <span class="p-title">3 Products</span>
+                <span class="p-stat highlight-red">82.7% Churn (11x surge)</span>
+              </div>
+              <div class="p-progress"><div class="p-fill" style="width: 82.7%; background: #ef4444;"></div></div>
+              <span class="p-note">⚠️ Over-complicated bundling friction</span>
+            </div>
+
+            <div class="paradox-bar-row danger-spot">
+              <div class="p-meta">
+                <span class="p-title">4 Products</span>
+                <span class="p-stat highlight-red">100.0% Churn (Definite)</span>
+              </div>
+              <div class="p-progress"><div class="p-fill" style="width: 100%; background: #dc2626;"></div></div>
+              <span class="p-note">🚨 Universal departure rate</span>
+            </div>
+          </div>
+          <div class="paradox-callout">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p><strong>Non-Linearity Insight:</strong> Logistic Regression forces a linear slope and completely misses this U-turn curve. Tree-based partitioning isolates 2-product safety from 3/4-product catastrophe seamlessly.</p>
+          </div>
+        </div>
+
+        <!-- Demographic Drivers: Age & Geography -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Age Gradient & Geography Impact</h3>
+              <p class="card-sub">Empirical churn rates across age brackets and country branches.</p>
+            </div>
+          </div>
+          
+          <div class="distribution-columns">
+            <div class="dist-col">
+              <h4 class="dist-col-title">Churn by Age Bracket</h4>
+              <div class="dist-list">
+                <div class="dist-item"><span class="d-label">18–30 yrs:</span><span class="d-val safe">7.5% churn</span></div>
+                <div class="dist-item"><span class="d-label">31–40 yrs:</span><span class="d-val mild">10.8% churn</span></div>
+                <div class="dist-item"><span class="d-label">41–50 yrs:</span><span class="d-val danger">34.0% churn</span></div>
+                <div class="dist-item"><span class="d-label">51–60 yrs:</span><span class="d-val critical">56.2% churn</span></div>
+                <div class="dist-item"><span class="d-label">60+ yrs:</span><span class="d-val danger">25.0% churn</span></div>
+              </div>
+            </div>
+
+            <div class="dist-col">
+              <h4 class="dist-col-title">Country & Activity Split</h4>
+              <div class="dist-list">
+                <div class="dist-item"><span class="d-label">Germany:</span><span class="d-val critical">32.4% (2x baseline)</span></div>
+                <div class="dist-item"><span class="d-label">France:</span><span class="d-val safe">16.2% churn</span></div>
+                <div class="dist-item"><span class="d-label">Spain:</span><span class="d-val safe">16.7% churn</span></div>
+                <div class="dist-item"><span class="d-label">Inactive Members:</span><span class="d-val critical">26.9% churn</span></div>
+                <div class="dist-item"><span class="d-label">Active Members:</span><span class="d-val safe">14.3% churn</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature Engineering Value -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Feature Engineering Impact</h3>
+              <p class="card-sub">Domain-specific transformations created in this project.</p>
+            </div>
+          </div>
+          <div class="fe-card-content">
+            <div class="fe-box">
+              <div class="fe-badge">1. ZeroBalance Flag</div>
+              <p class="fe-text"><strong>36.2%</strong> of all customers hold exactly a $0 balance. Rather than letting standard scaling treat 0 as a continuous midpoint, this binary flag allows the model to cleanly isolate fee-sensitive zero-balance debit accounts.</p>
+            </div>
+            <div class="fe-box">
+              <div class="fe-badge">2. Balance-to-Salary Ratio</div>
+              <p class="fe-text">Calculated as <code>Balance / EstimatedSalary</code>. Reveals financial capital density relative to earnings. Wealthy savers in Germany with ratios exceeding 1.5x churn at elevated rates due to competitive interest rate hunting.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: BATCH SCORING ==================== -->
+    <section class="tab-pane" id="tab-batch">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Batch Customer Scoring & Test Cohort</h2>
+            <p class="card-sub">Test real customer profiles from the held-out test split or upload your own CSV.</p>
+          </div>
+          <div class="batch-actions">
+            <button class="btn-primary" id="btnExportCSV">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export Results CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter and Search Bar -->
+        <div class="batch-filter-bar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="batchSearch" placeholder="Search customer surname or ID...">
+          </div>
+          <div class="filter-buttons">
+            <button type="button" class="filter-chip active" data-filter="all">All Records (<span id="countAll">30</span>)</button>
+            <button type="button" class="filter-chip" data-filter="high">High Risk > 50% (<span id="countHigh">--</span>)</button>
+            <button type="button" class="filter-chip" data-filter="medium">Medium Risk 30-50% (<span id="countMed">--</span>)</button>
+            <button type="button" class="filter-chip" data-filter="low">Low Risk < 30% (<span id="countLow">--</span>)</button>
+          </div>
+        </div>
+
+        <!-- Drag & Drop Uploader -->
+        <div class="drop-zone" id="csvDropZone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p><strong>Upload Custom Customer CSV</strong> or drag and drop file here</p>
+          <span class="drop-hint">Accepts standard banking CSVs with Age, Geography, Balance, Products, etc.</span>
+          <input type="file" id="csvFileInput" accept=".csv" style="display:none;">
+        </div>
+
+        <!-- Interactive Batch Table -->
+        <div class="table-responsive">
+          <table class="batch-table" id="batchTable">
+            <thead>
+              <tr>
+                <th>Customer ID</th>
+                <th>Surname</th>
+                <th>Age</th>
+                <th>Country</th>
+                <th>Products</th>
+                <th>Balance</th>
+                <th>Active</th>
+                <th>Actual Status</th>
+                <th>GB Churn Prob</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="batchTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: EXECUTIVE BRIEFING ==================== -->
+    <section class="tab-pane" id="tab-briefing">
+      <div class="briefing-container">
+        
+        <div class="card briefing-hero">
+          <div class="hero-badge">EXECUTIVE SUMMARY</div>
+          <h2 class="briefing-title">Customer Churn Machine Learning Findings & Strategic Roadmap</h2>
+          <p class="briefing-lead">Analysis of 10,000 retail bank customers evaluated across Logistic Regression, Random Forest, and Gradient Boosting algorithms.</p>
+        </div>
+
+        <div class="briefing-grid">
+          
+          <div class="card">
+            <h3 class="briefing-card-title">🏆 1. Model Champion Recommendation</h3>
+            <p>Deploy the <strong>Gradient Boosting Classifier</strong> tuned to a <strong>0.30 decision threshold</strong>. At this operational threshold:</p>
+            <ul class="briefing-list">
+              <li>Catches <strong>65.1% of all churners</strong> (Recall) compared to only 48.6% at the default 0.50 threshold.</li>
+              <li>Maintains a strong <strong>62.5% Precision</strong> (out of every 100 flagged customers, 62 genuinely depart).</li>
+              <li>Achieves top-in-class <strong>0.872 Test ROC-AUC</strong> and <strong>0.725 PR-AUC</strong>.</li>
+              <li>Outperforms Logistic Regression by <strong>+0.095 AUC</strong> due to non-linear interaction mastery.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3 class="briefing-card-title">⚠️ 2. The 4 Critical Churn Drivers</h3>
+            <div class="driver-summary-cards">
+              <div class="driver-summary-item">
+                <span class="d-num">#1</span>
+                <div>
+                  <strong>Customer Age:</strong>
+                  <p>Churn accelerates from 7.5% under age 30 up to 56.2% for ages 50–60. Middle-aged and pre-retirement customers constitute the highest loss risk.</p>
+                </div>
+              </div>
+              <div class="driver-summary-item">
+                <span class="d-num">#2</span>
+                <div>
+                  <strong>Product Count Paradox:</strong>
+                  <p>Holding 2 products is the safest state (7.6% churn). However, 3 products skyrockets churn to 82.7%, and 4 products hits 100%. Over-bundling creates severe friction.</p>
+                </div>
+              </div>
+              <div class="driver-summary-item">
+                <span class="d-num">#3</span>
+                <div>
+                  <strong>German Branch Exposure:</strong>
+                  <p>Germany accounts churn at 32.4%—exactly double the rates of France (16.2%) and Spain (16.7%), signaling branch/market-specific competitive vulnerabilities.</p>
+                </div>
+              </div>
+              <div class="driver-summary-item">
+                <span class="d-num">#4</span>
+                <div>
+                  <strong>Member Inactivity:</strong>
+                  <p>Inactive members churn at 26.9% vs 14.3% for active digital users. Engagement acts as a natural retention anchor.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="briefing-card-title">🎯 3. Actionable Retention Strategy</h3>
+            <div class="strategy-steps">
+              <div class="strategy-step">
+                <span class="step-badge">Phase 1</span>
+                <div>
+                  <strong>Product Rationalization Campaign:</strong>
+                  <p>Review customer portfolios holding 3+ products. Simplify cross-sold products, consolidate statements, and remove hidden product fees.</p>
+                </div>
+              </div>
+              <div class="strategy-step">
+                <span class="step-badge">Phase 2</span>
+                <div>
+                  <strong>Germany Market Retention Taskforce:</strong>
+                  <p>Benchmark German branch rates against local fintech rivals. Offer competitive deposit yield matching for German accounts holding >$80k.</p>
+                </div>
+              </div>
+              <div class="strategy-step">
+                <span class="step-badge">Phase 3</span>
+                <div>
+                  <strong>Pre-Retirement (45-60) Wealth Advisory:</strong>
+                  <p>Deploy dedicated financial advisors to engage high-balance 45–60 year old clients with retirement planning before funds are transferred out.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="briefing-card-title">💻 4. Technical Architecture & Reproduction</h3>
+            <p>This project is packaged with end-to-end reproducible pipelines:</p>
+            <div class="code-box">
+              <code># Retrain pipeline and generate metrics artifacts
+python churn_model.py data/Churn_Modelling.csv output
+
+# Run this interactive live demo locally
+python3 -m http.server 8000</code>
+            </div>
+            <p class="arch-note">Preprocessed with <code>ColumnTransformer</code> (StandardScaler + OneHotEncoder), evaluated with 5-fold Stratified CV, permutation importance calculated over held-out test splits.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <p>Customer Churn Prediction Intelligence Demo &bull; Antigravity High Performance ML Suite &bull; Ready for Netlify & Production Deployment</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

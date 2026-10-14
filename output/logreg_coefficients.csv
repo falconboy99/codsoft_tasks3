@@ -1,0 +1,15 @@
+,0
+cat__Gender_Male,-0.548
+num__IsActiveMember,-0.443
+cat__Geography_France,-0.268
+cat__Geography_Spain,-0.211
+num__CreditScore,-0.087
+num__ZeroBalance,-0.059
+num__NumOfProducts,-0.055
+num__HasCrCard,-0.031
+num__Tenure,-0.019
+num__EstimatedSalary,0.054
+num__BalanceToSalary,0.097
+num__Balance,0.123
+cat__Geography_Germany,0.541
+num__Age,0.8
